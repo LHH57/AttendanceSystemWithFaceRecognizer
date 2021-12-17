@@ -8,6 +8,47 @@
 
 ---
 
+# 程序储存规划
+
+## Person类
+
+### PersonInfo类
+
+用于存储员工信息
+
+### CommuteData
+
+链表数据域，存储打卡必要信息。
+
+### DataNode
+
+链表的结点，私有。
+
+## Attendance类
+
+### PersonWithData
+
+ - `info` ：用于存储员工信息。
+ - `vector` ：用于存储打卡信息，顺序结构。
+ - 其他关于打卡信息的统计信息。
+
+用来存储导出的员工打卡数据单元。
+
+### TreeNode
+
+是二叉树的结点类型。数据域： `person`类的对象，代表员工。
+
+### 文件存储结构
+
+对于每一个员工，分别存储其`Person`类的`info`成员和`CommuteData`向量。
+
+## Filter类
+
+包含一个字符串、一个元素为`PersonWithData`的向量，用于存储员工数据。
+
+
+---
+
 # 程序结构规划
 
 ## 人员类（Person）

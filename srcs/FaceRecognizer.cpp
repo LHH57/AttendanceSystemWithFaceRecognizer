@@ -90,6 +90,8 @@ FaceRecognizer::trainClassifier(std::string &&pics_csv_path, const std::string &
 {
     if (pics_csv_path.back() == '/')
         pics_csv_path.pop_back();
+
+    // TODO: it does not work.
     system(("python3 " + pics_csv_path + "/make_csv.py").c_str());
     std::vector<cv::Mat> imgs;
     std::vector<int> labels;

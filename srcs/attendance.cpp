@@ -3,6 +3,14 @@
 #include <utility>
 using namespace std;
 
+double Attendance::PersonWithData::getDiffHours(SYSTEMTIME a, SYSTEMTIME b)
+{
+    double diff = 0.0;
+    if(a.wYear == b.wYear && a.wMonth == b.wMonth && a.wDay == b.wDay)
+        diff = a.wHour - b.wHour + (a.wMinute - b.wMinute) / 60.0;
+    return diff;
+}
+
 Attendance::TreeNode::TreeNode(Person::PersonInfo _person)
     : person(std::move(_person))
 {
@@ -19,6 +27,24 @@ Attendance::PersonWithData::PersonWithData(const Person::PersonInfo &info, std::
     identy = info.identy;
     face_id = info.face_id;
     state = info.state;
+    SYSTEMTIME off_duty_time;
+    for (const auto& cd: commute_data)
+    {
+        if(!cd.on_duty)
+        {
+            off_duty_time = cd.time;
+        }
+        else
+        {
+            auto diff = getDiffHours(off_duty_time, cd.time);
+            if(diff > 0.01)
+            {
+                ++commute_times;
+                commute_hours += diff;
+            }
+        }
+    }
+    avg_commute_hours = commute_hours / commute_times;
 }
 
 Person &Attendance::addPerson(const Person::PersonInfo &person)
@@ -118,7 +144,7 @@ vector<Attendance::PersonWithData> &&Attendance::derivePersonData()
     return std::move(data);
 }
 
-bool Attendance::save(string path)
+bool Attendance::save(const string& path)
 {
     ofstream f(path, ofstream::out | ofstream::binary);
     if (!f.is_open()) return false;
@@ -134,7 +160,7 @@ bool Attendance::save(string path)
     return true;
 }
 
-bool Attendance::load(string path)
+bool Attendance::load(const string& path)
 {
     ifstream f(path, ifstream::in | ifstream::binary);
     if (!f.is_open()) return false;

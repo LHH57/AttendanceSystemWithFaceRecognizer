@@ -15,9 +15,13 @@ class Attendance {
 
         int face_id = -1;
         std::vector<Person::CommuteData> commute_data;
+        int commute_times = 0;
+        double commute_hours = 0;
+        double avg_commute_hours = 0.0;
 
         PersonWithData() = default;
         PersonWithData(const Person::PersonInfo &info, std::vector<Person::CommuteData> data);
+        static double getDiffHours(SYSTEMTIME a, SYSTEMTIME b);
     };
 
  private:
@@ -51,8 +55,8 @@ class Attendance {
     void clearPersonData();
     std::vector<PersonWithData> && derivePersonData();    //中序遍历
 
-    bool load(std::string path);    //用先序遍历构造树
-    bool save(std::string path);    //先序遍历
+    bool load(const std::string& path);    //用先序遍历构造树
+    bool save(const std::string& path);    //先序遍历
 
  private:
     template<class VISIT_FUNC>

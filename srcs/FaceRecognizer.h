@@ -13,7 +13,7 @@ class FaceRecognizer {
     static constexpr char Pic_File_Format[] = ".pgm";           // 照片格式
     static constexpr int Face_ROI_Region_Height = 231;          // 照片大小（高）
     static constexpr int Face_ROI_Region_Width = 195;           // 照片大小（宽）
-    static constexpr int Inital_Face_Number = 16;               // 自带数据集大小
+    static constexpr int Inital_Face_Number = 16;               // 自带数据集大小，仅供测试使用。
 
  private:
     cv::CascadeClassifier cas;
