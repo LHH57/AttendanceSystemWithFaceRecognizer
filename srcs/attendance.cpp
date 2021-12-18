@@ -6,13 +6,13 @@ using namespace std;
 double Attendance::PersonWithData::getDiffHours(SYSTEMTIME a, SYSTEMTIME b)
 {
     double diff = 0.0;
-    if(a.wYear == b.wYear && a.wMonth == b.wMonth && a.wDay == b.wDay)
+    if (a.wYear == b.wYear && a.wMonth == b.wMonth && a.wDay == b.wDay)
         diff = a.wHour - b.wHour + (a.wMinute - b.wMinute) / 60.0;
     return diff;
 }
 
-Attendance::TreeNode::TreeNode(Person::PersonInfo _person)
-    : person(std::move(_person))
+Attendance::TreeNode::TreeNode(const Person::PersonInfo &_person)
+    : person(_person)
 {
     left_child = nullptr;
     right_child = nullptr;
@@ -28,27 +28,28 @@ Attendance::PersonWithData::PersonWithData(const Person::PersonInfo &info, std::
     face_id = info.face_id;
     state = info.state;
     SYSTEMTIME off_duty_time;
-    for (const auto& cd: commute_data)
+    for (const auto &cd: commute_data)
     {
-        if(!cd.on_duty)
+        if (!cd.on_duty)
         {
             off_duty_time = cd.time;
         }
         else
         {
             auto diff = getDiffHours(off_duty_time, cd.time);
-            if(diff > 0.01)
+            if (diff > 0.01)
             {
                 ++commute_times;
                 commute_hours += diff;
             }
         }
     }
-    avg_commute_hours = commute_hours / commute_times;
+    avg_commute_hours = commute_times == 0 ? 0 : commute_hours / commute_times;
 }
 
-Person &Attendance::addPerson(const Person::PersonInfo &person)
+Person &Attendance::addPerson(Person::PersonInfo person)
 {
+    person.face_id = ++person_num;
     if (pTree == nullptr)
     {
         pTree = new TreeNode(person);
@@ -67,7 +68,6 @@ Person &Attendance::addPerson(const Person::PersonInfo &person)
                 {
                     p->right_child = new TreeNode(person);
                     p = p->right_child;
-                    ++person_num;
                     break;
                 }
             }
@@ -78,7 +78,6 @@ Person &Attendance::addPerson(const Person::PersonInfo &person)
                 else
                 {
                     p->left_child = new TreeNode(person);
-                    ++person_num;
                     p = p->left_child;
                     break;
                 }
@@ -131,28 +130,30 @@ void Attendance::destoryPersons()
             }
         }
     }
+    pTree = nullptr;
     person_num = 0;
 }
 
-vector<Attendance::PersonWithData> &&Attendance::derivePersonData()
+vector<Attendance::PersonWithData> Attendance::derivePersonData()
 {
-    vector<PersonWithData> data(person_num);
+    vector<PersonWithData> data;
+    data.reserve(person_num);
     inorderVisit([&](node_ptr &p)
                  {
                      data.emplace_back(p->person.info, p->person.getCommuteData());
                  });
-    return std::move(data);
+    return data;
 }
 
-bool Attendance::save(const string& path)
+bool Attendance::save(const string &path)
 {
     ofstream f(path, ofstream::out | ofstream::binary);
     if (!f.is_open()) return false;
     inorderVisit([&](node_ptr &p)
                  {
+                     p->person.info.save(f);
                      auto commute_data = p->person.getCommuteData();
                      auto size = commute_data.size();
-                     f.write((char *) &p->person.info, sizeof(p->person.info));
                      f.write((char *) &size, sizeof(size));
                      f.write((char *) commute_data.data(), sizeof(Person::CommuteData) * size);
                  });
@@ -160,7 +161,7 @@ bool Attendance::save(const string& path)
     return true;
 }
 
-bool Attendance::load(const string& path)
+bool Attendance::load(const string &path)
 {
     ifstream f(path, ifstream::in | ifstream::binary);
     if (!f.is_open()) return false;
@@ -168,10 +169,12 @@ bool Attendance::load(const string& path)
     Person::PersonInfo info;
     Person::CommuteData tmp{};
     unsigned long long int size;
+    person_num = 0;
     while (!f.eof())
     {
-        f.read((char *) &info, sizeof(info));
+        info.load(f);
         auto &p = addPerson(info);
+        ++person_num;
         f.read((char *) &size, sizeof(size));
         for (int i = 0; i < size; ++i)
         {

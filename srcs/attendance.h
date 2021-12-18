@@ -29,7 +29,8 @@ class Attendance {
         Person person;
         struct TreeNode *left_child, *right_child;
         bool flag;
-        explicit TreeNode(Person::PersonInfo _person);
+        explicit TreeNode(const Person::PersonInfo &_person);
+        ~TreeNode() = default;
     };
     using node_ptr = TreeNode *;
 
@@ -49,11 +50,11 @@ class Attendance {
     Attendance &operator=(const Attendance &attendance) = delete;
  public:
     // 返回引用是load时为了添加info同时添加CommuteData。
-    Person &addPerson(const Person::PersonInfo &person);
+    Person &addPerson(Person::PersonInfo person);
     Person &findPerson(int face_id);
     void destoryPersons();    // 后序遍历
     void clearPersonData();
-    std::vector<PersonWithData> && derivePersonData();    //中序遍历
+    std::vector<PersonWithData> derivePersonData();    //中序遍历
 
     bool load(const std::string& path);    //用先序遍历构造树
     bool save(const std::string& path);    //先序遍历

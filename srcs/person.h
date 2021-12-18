@@ -14,6 +14,9 @@ class Person {
         bool state = false; //表示员工当前状态是上班还是下班
 
         int face_id; //记录员工的face编号用于人脸识别
+
+        void save(std::ofstream& f);
+        void load(std::ifstream& f);
     } info;
     struct CommuteData {
         SYSTEMTIME time;

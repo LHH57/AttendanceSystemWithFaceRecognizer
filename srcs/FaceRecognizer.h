@@ -9,7 +9,7 @@ class FaceRecognizer {
  private:
     using FaceRecognizerType = cv::face::FisherFaceRecognizer;  // 分类方法
     static constexpr double Admissible_Confidence = 1800;       // 置信度（越小越好）
-    static constexpr char Data_Folder_Path[] = "../data/";      // 照片路径
+    static constexpr char Data_Folder_Path[] = "../pics_data/";      // 照片路径
     static constexpr char Pic_File_Format[] = ".pgm";           // 照片格式
     static constexpr int Face_ROI_Region_Height = 231;          // 照片大小（高）
     static constexpr int Face_ROI_Region_Width = 195;           // 照片大小（宽）

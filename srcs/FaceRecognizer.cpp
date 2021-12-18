@@ -1,7 +1,6 @@
 #include "FaceRecognizer.h"
 #include <fstream>
 #include <vector>
-#include <cstdlib>
 #include <direct.h>
 
 FaceRecognizer::FaceRecognizer()
@@ -91,8 +90,7 @@ FaceRecognizer::trainClassifier(std::string &&pics_csv_path, const std::string &
     if (pics_csv_path.back() == '/')
         pics_csv_path.pop_back();
 
-    // TODO: it does not work.
-    system(("python3 " + pics_csv_path + "/make_csv.py").c_str());
+    // TODO: we should run make_csv.py here.
     std::vector<cv::Mat> imgs;
     std::vector<int> labels;
     read_csv_file(pics_csv_path + "/pics.csv", imgs, labels);

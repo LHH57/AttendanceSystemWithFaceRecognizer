@@ -1,6 +1,6 @@
 #include "person.h"
 
-#include <utility>
+#include <fstream>
 using namespace std;
 
 Person::Person()
@@ -15,8 +15,45 @@ Person::Person()
 Person::Person(Person::PersonInfo info)
     : info(std::move(info))
 {
-    records = nullptr;
+    records = new DataNode(false);
     records_num = 0;
+}
+
+Person::~Person()
+{
+    if (records != nullptr)
+    {
+        clearCommuteData();
+        delete records;
+    }
+}
+
+void Person::PersonInfo::save(ofstream& f)
+{
+    auto size = name.size();
+    f.write((char*)&size, sizeof(size));
+    f.write(name.c_str(), size * sizeof(name.front()));
+    size = id_number.size();
+    f.write((char*)&size, sizeof(size));
+    f.write(id_number.c_str(), size * sizeof(id_number.front()));
+    f.write((char*)&identy, sizeof(identy));
+    f.write((char*)&state, sizeof(state));
+    f.write((char*)&face_id, sizeof(face_id));
+}
+
+void Person::PersonInfo::load(ifstream& f)
+{
+    auto size = name.size();
+
+    f.read((char*)&size, sizeof(size));
+    name.resize(size);
+    f.read(name.data(), size * sizeof(name.front()));
+    f.read((char*)&size, sizeof(size));
+    id_number.resize(size);
+    f.read(id_number.data(), size * sizeof(id_number.front()));
+    f.read((char*)&identy, sizeof(identy));
+    f.read((char*)&state, sizeof(state));
+    f.read((char*)&face_id, sizeof(face_id));
 }
 
 void Person::commute()
@@ -30,11 +67,12 @@ void Person::commute()
 
 vector<Person::CommuteData> Person::getCommuteData()
 {
-    vector<Person::CommuteData> datas(records_num);
+    vector<Person::CommuteData> datas;
+    datas.reserve(records_num);
     commute_record p = records->next;
     while (p != nullptr)
     {
-        datas.push_back(p->data);
+        datas.emplace_back(p->data);
         p = p->next;
     }
     return datas;
@@ -42,20 +80,16 @@ vector<Person::CommuteData> Person::getCommuteData()
 
 void Person::clearCommuteData()
 {
-    commute_record q, p = records->next;
-    while (p != nullptr)
+    commute_record p;
+    while (records->next != nullptr)
     {
-        q = p->next;
-        delete p;
-        p = q;
+        p = records->next->next;
+        delete records->next;
+        records->next = p;
     }
     records_num = 0;
 }
-Person::~Person()
-{
-    clearCommuteData();
-    delete records;
-}
+
 void Person::addCommuteData(CommuteData data)
 {
     commute_record p = records->next;
