@@ -2,8 +2,6 @@
 #define ATTENDANCE_H
 
 #include "person.h"
-#include <string>
-#include <vector>
 
 class Attendance {
  public:
